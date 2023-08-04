@@ -31,6 +31,9 @@ robot = siid.siid
 control = Control(robot, path_to_restart)
 
 
+
+
+
 def add_esp_channels():
 
     global control
