@@ -9,6 +9,16 @@ public class SensorValue
         private string _key;
         
     #endregion
+
+
+    #region PARAMETERS
+
+        public byte CurrentValue
+        {
+                get => _ongoingValue.CurrentVal;
+        }
+
+    #endregion
     
     
     #region Constructor

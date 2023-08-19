@@ -37,8 +37,16 @@ public class UDPCameraViewer : MonoBehaviour
     private byte[] data;
     private Thread receiveThread;
 
+    // FOR THE FUTURE
+    // private SensorValue _cameraX;
+    // private SensorValue _cameraY;
+    
     private void Start()
     {
+        // FOR THE FUTURE
+        // _cameraX = new SensorValue("_ax");
+        // _cameraX = new SensorValue("_ay");
+        
         udpClient = new UdpClient(udpPort);
         udpClient.Client.ReceiveTimeout = 2000; // Set the UDP socket timeout to 2 seconds
 
@@ -55,6 +63,9 @@ public class UDPCameraViewer : MonoBehaviour
 
         //udp send ay:-3_ax:-1_az:1_gx:-2_gy:0_gz:1\n
         //udpClient.Send(System.Text.Encoding.ASCII.GetBytes("ay:-3_ax:-1_az:1_gx:-2_gy:0_gz:1\n"), 28, serverIP, serverPort);
+
+        // SEND initial camera angles of 0, 0
+        SendMsg(GetCameraMsg(0.0f, 0.0f));
     }
 
     //prev send time
@@ -62,7 +73,10 @@ public class UDPCameraViewer : MonoBehaviour
     public float _deltaSendTime = 0.05f;
     public float _ySensitivity = 1/20f;
     public float _xSensitivity = 1/30f;
-
+    public float prevXAngle = 1000f;  // initialise to value out of bounds so that first val is always sent
+    public float prevYAngle = 1000f;
+    public float tolerance = 0.02f;
+    
     void FixedUpdate()
     {
         // Send the camera's X and Y angles via UDP every 0.05 seconds
@@ -75,12 +89,33 @@ public class UDPCameraViewer : MonoBehaviour
 
     void CheckSendMessages()
     {
-        SendCameraAnglesUDP(_camera.transform.eulerAngles.x, _camera.transform.eulerAngles.y);
-        SendJoystickUDP();
+        // add to TEXT the camera transform angles x and y
+        // text.text += "\nCAMERA EULER - x: " + _camera.transform.eulerAngles.x + " - y: " + _camera.transform.eulerAngles.y;
+        
+        var msg = GetCameraAnglesUDP(_camera.transform.eulerAngles.x, _camera.transform.eulerAngles.y);
+        
+        msg = AddMsg(msg, rightJoystick.TryGetMsg());
+        msg = AddMsg(msg, leftJoystick.TryGetMsg());
+        
+        // if msg is not empty, SendMsg
+        if (msg != "")
+            SendMsg(msg);
+    }
+
+    private string AddMsg(string prevMsg, string nextMsg)
+    {
+        // if prevMsg is empty, return nextMsg; if nextMsg is empty, return prevMsg; if neither are empty, return prevMsg_nextMsg
+        if (prevMsg == "")
+            return nextMsg;
+        
+        if (nextMsg == "")
+            return prevMsg;
+        
+        return prevMsg + "_" + nextMsg;
     }
     
     // Send camera angles via UDP
-    void SendCameraAnglesUDP(float xAngle, float yAngle)
+    string GetCameraAnglesUDP(float xAngle, float yAngle)
     {
         //if xangle > 180 then xangle = xangle - 360
         if (xAngle > 180)
@@ -111,25 +146,42 @@ public class UDPCameraViewer : MonoBehaviour
         //clamp xAngle and yAngle between 3 and -3
         xAngle = Mathf.Clamp(xAngle, -3, 3);
         yAngle = Mathf.Clamp(yAngle, -3, 3);
-        string message = "az:" + yAngle.ToString() + "_ay:" + xAngle.ToString() + "\n";
         
-        SendMsg(message);
+        // if xAngle or yAngle is too close by 'tolerance' to previous value, don't send
+        // if xAngle or yAngle are -3 or 3 and their prevAngle value is not exactly -3 or 3, send
+         var msg = "";
+         if (Mathf.Abs(xAngle - prevXAngle) > tolerance || Mathf.Abs(yAngle - prevYAngle) > tolerance ||
+             (Mathf.Abs(xAngle - prevXAngle) > 0.0001f && (xAngle >= 3 || xAngle <= -3)) ||
+             (Mathf.Abs(yAngle - prevYAngle) > 0.0001f && (yAngle >= 3 || yAngle <= -3)))
+         {
+             msg = GetCameraMsg(xAngle, yAngle);
+         }
+         return msg;
+        
+        // return GetCameraMsg(xAngle, yAngle);
     }
 
-    // send joystick values via UDP if there is something to send
-    void SendJoystickUDP()
+    private string GetCameraMsg(float xAngle, float yAngle)
     {
-        SendMsg(rightJoystick.TryGetMsg());
-        SendMsg(leftJoystick.TryGetMsg());
+        //update prevAngle
+        prevXAngle = xAngle;
+        prevYAngle = yAngle;
+        //send udp message
+        return "az:" + yAngle.ToString() + "_ay:" + xAngle.ToString();
     }
-
+    
+    
     void SendMsg(string msg)
     {
         if (msg == "")
+        {
             return;
+        }
         
         //replace all "," with "."
         msg = msg.Replace(",", ".");
+        msg = msg + "\n";
+        
         byte[] data = System.Text.Encoding.ASCII.GetBytes(msg);
         udpClient.Send(data, data.Length, serverIP, serverPort);
         //log
