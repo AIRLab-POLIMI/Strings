@@ -116,7 +116,7 @@ public class JoyController : MonoBehaviour
             _rz.OnNewValueReceived(joystickAngles.z);
             
             // debug log the key and all the current rotations
-            Debug.Log(key + " - " + joystickAngles);
+            // Debug.Log(key + " - " + joystickAngles);
         }
 
         private void GetJoystickInput()

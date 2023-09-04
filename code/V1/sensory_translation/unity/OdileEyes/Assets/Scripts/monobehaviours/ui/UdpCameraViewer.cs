@@ -20,7 +20,8 @@ public class UdpCameraViewer : MonoBehaviour
 
     void Update(){
         // Create a new texture from data received by network manager
-        receivedTexture.LoadImage(NetworkManager.Instance.Data);
+        // receivedTexture.LoadImage(NetworkManager.Instance.Data);
+        receivedTexture.LoadImage(UDPManager.Instance.Data);
         //if image is square continue
         if (receivedTexture.width == receivedTexture.height)
         {
@@ -28,7 +29,8 @@ public class UdpCameraViewer : MonoBehaviour
         }
         else
         {
-            lastValidReceivedTexture.LoadImage(NetworkManager.Instance.Data);
+            // lastValidReceivedTexture.LoadImage(NetworkManager.Instance.Data);
+            lastValidReceivedTexture.LoadImage(UDPManager.Instance.Data);
         }
         //if lastvalid is not null apply
         if (lastValidReceivedTexture != null)

@@ -29,7 +29,8 @@ public class InputManager : Monosingleton<InputManager>
             // Send the camera's X and Y angles via UDP every 0.05 seconds
             if (Time.time - _prevSendTime > deltaSendTime)
             {
-                NetworkManager.Instance.SendMsg(GetUdpMessage());
+                // NetworkManager.Instance.SendMsg(GetUdpMessage());
+                UDPManager.Instance.SendStringUpdToRasp(GetUdpMessage());
                 _prevSendTime = Time.time;
             }
         }
