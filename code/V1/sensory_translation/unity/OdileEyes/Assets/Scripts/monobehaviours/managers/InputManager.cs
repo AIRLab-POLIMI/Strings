@@ -30,7 +30,7 @@ public class InputManager : Monosingleton<InputManager>
             if (Time.time - _prevSendTime > deltaSendTime)
             {
                 // NetworkManager.Instance.SendMsg(GetUdpMessage());
-                UDPManager.Instance.SendStringUpdToRasp(GetUdpMessage());
+                UDPManager.Instance.SendStringUpdToDefaultEndpoint(GetUdpMessage());
                 _prevSendTime = Time.time;
             }
         }

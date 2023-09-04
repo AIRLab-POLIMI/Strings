@@ -36,7 +36,7 @@ public abstract class UnityValue<T>
         _currentValue = newVal;
         
         if (IsLargerThanTolerance())
-            UDPManager.Instance.SendStringUpdToRasp(GetMsg()); 
+            UDPManager.Instance.SendStringUpdToDefaultEndpoint(GetMsg()); 
     }
     
     // used to get the formatted "currentValue". E.g. for "float" it's rounded to some decimals

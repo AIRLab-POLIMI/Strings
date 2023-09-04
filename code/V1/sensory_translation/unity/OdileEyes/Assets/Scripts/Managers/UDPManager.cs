@@ -1,5 +1,6 @@
 
 using System.Collections;
+using System.Net;
 using Core;
 using Oasis.GameEvents;
 using UnityEngine;
@@ -9,7 +10,7 @@ public class UDPManager : Monosingleton<UDPManager>
 {
     [Header("network setup")]
     
-    [SerializeField] private EndPointSO _raspberryEndpoint;
+    [SerializeField] private EndPointSO _defaultEndpoint;
     public int myPort = 12345; // UDP port to listen on
     
     [Tooltip("max life of unread udp messages, in MINUTES")]
@@ -33,7 +34,7 @@ public class UDPManager : Monosingleton<UDPManager>
         SetInitialized(true);
         
         // GENERAL
-        _udpMessenger.Init(_raspberryEndpoint.EndPoint, myPort, maxMsgAge: maxUdpAge, bufferSize: bufferSize);
+        _udpMessenger.Init(_defaultEndpoint.EndPoint, myPort, maxMsgAge: maxUdpAge, bufferSize: bufferSize);
 
         StartCoroutine(CheckOldMessages());
     }
@@ -55,14 +56,25 @@ public class UDPManager : Monosingleton<UDPManager>
         }
     }
     
-    public void SendStringUpdToRasp(string message)
+    public void SendStringUpdToDefaultEndpoint(string message)
     {
         // only works if INITIALIZED, meaning, if game has started
         // Debug.Log($"[UDP MANAGER][SendStringUpdToRasp] - INIT: '{_initialized}'");
         if (_initialized)
         {
             // Debug.Log($"[UDP MANAGER] - sending message: '{message}' to RASP");
-            _udpMessenger.SendUdp(message, _raspberryEndpoint.EndPoint);
+            _udpMessenger.SendUdp(message, _defaultEndpoint.EndPoint);
+        }
+    }
+    
+    public void SendStringUpd(string message, IPEndPoint endPoint)
+    {
+        // only works if INITIALIZED, meaning, if game has started
+        // Debug.Log($"[UDP MANAGER][SendStringUpdToRasp] - INIT: '{_initialized}'");
+        if (_initialized)
+        {
+            // Debug.Log($"[UDP MANAGER] - sending message: '{message}' to RASP");
+            _udpMessenger.SendUdp(message, endPoint);
         }
     }
     

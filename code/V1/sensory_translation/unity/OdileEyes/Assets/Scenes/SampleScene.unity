@@ -3099,10 +3099,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d27dd814776db48f28194c56c2a7469f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  serverIP: 192.168.0.103
-  serverPort: 40616
-  text: {fileID: 2040231071}
-  maxDisplayedMessages: 8
 --- !u!4 &2004530193
 Transform:
   m_ObjectHideFlags: 0
@@ -3130,7 +3126,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 30d7ed04e4e9b4548b4f8087be19545f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _raspberryEndpoint: {fileID: 11400000, guid: aaa8b9b9f158f46dfb78abf8b0283705, type: 2}
+  _defaultEndpoint: {fileID: 11400000, guid: aaa8b9b9f158f46dfb78abf8b0283705, type: 2}
   myPort: 12345
   maxUdpAge: 2
   bufferSize: 50
