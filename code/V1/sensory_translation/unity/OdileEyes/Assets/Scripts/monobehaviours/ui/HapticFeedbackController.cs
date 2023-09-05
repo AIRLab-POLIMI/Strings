@@ -20,13 +20,14 @@ public class HapticFeedbackController : MonoBehaviour
     
     private void Awake()
     {
-        // SetBoxNoTouchActive();
-        SetBoxTouchActive();
+        SetBoxNoTouchActive();
         _prevState = false;
     }
 
     public void OnMsgRcv(string msg)
     {
+        // Debug.Log($"[HapticFeedbackController][OnMsgRcv] - {msg}");
+
         if (msg == touchMsgTouchStart.runtimeValue)
         {
             if (!_prevState)
