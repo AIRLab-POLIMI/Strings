@@ -97,7 +97,14 @@ public class UDPManager : Monosingleton<UDPManager>
                 // check if it's a key-value message
                 // otherwise, store the raw data in the input buffer, to be used by the UdpCameraViewer
                 if (!CheckKeyValueMessage(message.Msg))
+                {
+                    // Debug.Log($"[UDP MANAGER] - RECEIVED RAW MESSAGE: {message.RawMsg} - {message.RawMsg.Length}");
                     _data = message.RawMsg;
+                }
+                else
+                {
+                    Debug.Log($"[UDP MANAGER] - RECEIVED KEY VALUE MESSAGE");
+                }
             }
         }
     }
@@ -106,10 +113,11 @@ public class UDPManager : Monosingleton<UDPManager>
     {
         var keyValMsg = KeyValueMsg.ParseKeyValueMsg(msg);
 
-        // Debug.Log($"  ---[CheckKeyValueMessage] - string msg: '{msg}' - KEY VALUE MESSAGE: {keyValMsg} - is it NONE? {keyValMsg == null} - {keyValMsg?.key} - {keyValMsg?.value}");
+        // Debug.Log($"  ---[CheckKeyValueMessage] - string msg: '{msg}' - KEY VALUE MESSAGE: {keyValMsg} - is it NONE? {keyValMsg == null} - {keyValMsg?.key} - val: {keyValMsg?.value} - string val: {keyValMsg?.stringValue}");
         
-        if (keyValMsg != null && keyValMsg.success)
+        if (keyValMsg != null)
         {
+            // Debug.Log("Calling GE!");
             // ON KEY VALUE MSG GE
             onKeyValueReceived.Invoke(keyValMsg);
             return true;

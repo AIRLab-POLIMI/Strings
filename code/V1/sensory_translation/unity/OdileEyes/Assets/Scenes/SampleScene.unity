@@ -329,6 +329,11 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3555067590951354793, guid: eaea79c96498b4d0bb248c0dea0a5a89,
+        type: 3}
+      propertyPath: m_ConstrainProportionsScale
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 3555067590951354794, guid: eaea79c96498b4d0bb248c0dea0a5a89,
         type: 3}
       propertyPath: m_Enabled
@@ -2891,7 +2896,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   boxPrefab: {fileID: 3384137643849048178, guid: eaea79c96498b4d0bb248c0dea0a5a89,
     type: 3}
-  btnMsgWrongBtn: {fileID: 11400000, guid: 6ecdc4d8a91724ba79e51cd40edb465f, type: 2}
   btnMsgRightBtn: {fileID: 11400000, guid: df7e6899b2f234f8a89fa754fbd80cf8, type: 2}
   wrongBtnText: wrong btn
   rightBtnText: right btn

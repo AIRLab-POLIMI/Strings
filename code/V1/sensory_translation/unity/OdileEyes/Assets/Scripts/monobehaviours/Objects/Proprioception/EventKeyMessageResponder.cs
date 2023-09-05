@@ -10,6 +10,10 @@ public class EventKeyMessageResponder : KeyMessageResponder
 
     protected override void MessageResponse(float val) => _floatEventResponse?.Invoke(val);
     
-    protected override void StringMessageResponse(string val) => _stringEventResponse?.Invoke(val);
+    protected override void StringMessageResponse(string val) {
+        // Debug.Log($"[EventKeyMessageResponder][StringMessageResponse] - my key: {dofKey.runtimeValue} - msg: {val}");
+        
+        _stringEventResponse?.Invoke(val);
+    }
     
 }

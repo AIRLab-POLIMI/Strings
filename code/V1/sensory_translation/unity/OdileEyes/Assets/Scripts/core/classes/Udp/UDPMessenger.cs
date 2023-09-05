@@ -303,6 +303,7 @@ public class UdpMessage
     
     public UdpMessage(byte[] rawMsg, string msg, IPEndPoint sender)
     {
+        RawMsg = rawMsg;
         Msg = msg;
         Sender = sender;
         ReceptionTime = DateTime.Now;

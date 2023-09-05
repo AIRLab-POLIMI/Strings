@@ -1,5 +1,4 @@
 
-using Core;
 using UnityEngine;
 
 
@@ -15,19 +14,35 @@ public class HapticFeedbackController : MonoBehaviour
     [SerializeField] private StringSO touchMsgTouchStart;
     [SerializeField] private StringSO touchMsgTouchEnd;
 
+
+    private bool _prevState;
+    
     
     private void Awake()
     {
         // SetBoxNoTouchActive();
         SetBoxTouchActive();
+        _prevState = false;
     }
 
     public void OnMsgRcv(string msg)
     {
         if (msg == touchMsgTouchStart.runtimeValue)
-            SetBoxTouchActive();
+        {
+            if (!_prevState)
+            {
+                SetBoxTouchActive();
+                _prevState = true;
+            }
+        }
         else if (msg == touchMsgTouchEnd.runtimeValue)
-            SetBoxNoTouchActive();
+        {
+            if (_prevState)
+            {
+                SetBoxNoTouchActive();
+                _prevState = false;
+            }
+        }
     }
 
     private void SetBoxTouchActive()

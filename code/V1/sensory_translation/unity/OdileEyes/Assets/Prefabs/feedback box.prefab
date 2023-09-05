@@ -306,3 +306,7 @@ MonoBehaviour:
   negativeColor: {r: 0.7075472, g: 0.23028658, b: 0.23028658, a: 1}
   image: {fileID: 3555067590012427853}
   text: {fileID: 5353175483876171600}
+  duration: 0.5
+  repeatCount: 1
+  blinkCount: 5
+  scaleFactor: 1.5
