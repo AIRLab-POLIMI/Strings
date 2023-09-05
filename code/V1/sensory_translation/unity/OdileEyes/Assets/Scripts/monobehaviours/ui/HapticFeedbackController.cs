@@ -18,7 +18,8 @@ public class HapticFeedbackController : MonoBehaviour
     
     private void Awake()
     {
-        SetBoxNoTouchActive();
+        // SetBoxNoTouchActive();
+        SetBoxTouchActive();
     }
 
     public void OnMsgRcv(string msg)

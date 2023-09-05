@@ -302,7 +302,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fafc395ecdeac4345af486fb3a49b399, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  positiveColor: {r: 0.64850783, g: 1, b: 0.3160377, a: 0}
-  negativeColor: {r: 0.7075472, g: 0.23028658, b: 0.23028658, a: 0}
+  positiveColor: {r: 0.64850783, g: 1, b: 0.3160377, a: 1}
+  negativeColor: {r: 0.7075472, g: 0.23028658, b: 0.23028658, a: 1}
   image: {fileID: 3555067590012427853}
   text: {fileID: 5353175483876171600}
