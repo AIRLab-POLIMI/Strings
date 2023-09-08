@@ -7,61 +7,42 @@ public class BtnFeedbackController : MonoBehaviour
 {
     [SerializeField] private FeedbackBoxController boxPrefab;
 
-[Header("button messages")]
+    private List<string> _receivedBtnsRight = new List<string>();
+    private List<string> _receivedBtnsWrong = new List<string>();
     
-    [SerializeField] private StringSO btnMsgRightBtn;
+    private List<FeedbackBoxController> _boxesRight = new List<FeedbackBoxController>();
+    private List<FeedbackBoxController> _boxesWrong = new List<FeedbackBoxController>();
 
-[Header("UI")]
-    
-    [SerializeField] private string wrongBtnText;
-    [SerializeField] private string rightBtnText;
 
-    private List<string> _receivedBtns = new List<string>();
+    public void OnRightBtnMsgRcv(string msg) => 
+        OnMsgReceived(_boxesRight, _receivedBtnsRight, msg, true);
     
-    private List<FeedbackBoxController> _boxes = new List<FeedbackBoxController>();
+    public void OnWrongBtnMsgRcv(string msg) => 
+        OnMsgReceived(_boxesWrong, _receivedBtnsWrong, msg, false);
     
     
-    public void OnMsgRcv(string msg)
+    private void OnMsgReceived(List<FeedbackBoxController> boxes, List<string> receivedBtns, string msg, bool rightBtn)
     {
-        // Debug.Log($"[BtnFeedbackController][OnMsgRcv] - msg: {msg}");
+        Debug.Log($"[BtnFeedbackController][OnMsgRcv] - msg: {msg} - right btn? {rightBtn}");
         
-        if (_receivedBtns.Contains(msg))
+        if (receivedBtns.Contains(msg))
         {   
-            foreach (var box in _boxes)
+            foreach (var box in boxes)
             {
                 if (msg == box.Id)
                     box.Highlight();
             }
             return;
         }
-
+    
         FeedbackBoxController newBox = InstantiateBox();
         newBox.Init(msg);
-        _boxes.Add(newBox);
+        boxes.Add(newBox);
         
-        if (msg == btnMsgRightBtn.runtimeValue)
-            OnRightBtnReceived(newBox);
-        else 
-            OnWrongBtnReceived(newBox);
+        newBox.SetImageColor(rightBtn);
+        newBox.SetText(msg);
         
-        _receivedBtns.Add(msg);
-    }
-    
-    private void OnWrongBtnReceived(FeedbackBoxController newBox)
-    {
-        newBox.SetImageColor(false);
-        newBox.SetText(wrongBtnText);
-    }
-
-    private void OnRightBtnReceived(FeedbackBoxController newBox)
-    {
-        newBox.SetImageColor(true);
-        newBox.SetText(rightBtnText);
-    }
-
-    private void OnMsgReceived()
-    {
-        
+        receivedBtns.Add(msg);
     }
     
     // instantiate a gameobject from the boxPrefab as a child to this object and extract the FeedbackBoxController component from it

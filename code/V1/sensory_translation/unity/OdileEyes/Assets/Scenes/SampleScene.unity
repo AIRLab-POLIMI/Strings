@@ -2829,6 +2829,7 @@ GameObject:
   - component: {fileID: 1914146672}
   - component: {fileID: 1914146673}
   - component: {fileID: 1914146674}
+  - component: {fileID: 1914146675}
   m_Layer: 0
   m_Name: btn feedback
   m_TagString: Untagged
@@ -2896,9 +2897,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   boxPrefab: {fileID: 3384137643849048178, guid: eaea79c96498b4d0bb248c0dea0a5a89,
     type: 3}
-  btnMsgRightBtn: {fileID: 11400000, guid: df7e6899b2f234f8a89fa754fbd80cf8, type: 2}
-  wrongBtnText: wrong btn
-  rightBtnText: right btn
 --- !u!114 &1914146674
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2937,7 +2935,55 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 1914146673}
         m_TargetAssemblyTypeName: BtnFeedbackController, Assembly-CSharp
-        m_MethodName: OnMsgRcv
+        m_MethodName: OnRightBtnMsgRcv
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+--- !u!114 &1914146675
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1914146670}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aab4152cf09ab4d3f8f6ccdd92c2d597, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  priorityLevel: 2
+  _unityEvent:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 1914146675}
+        m_TargetAssemblyTypeName: KeyMessageResponder, Assembly-CSharp
+        m_MethodName: OnKeyValueMsgReceived
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+  _gameEvent: {fileID: 11400000, guid: f525574cad3dd425aaeb1affc6cdf109, type: 2}
+  dofKey: {fileID: 11400000, guid: 23f5eb9f0fbf64be181d26a2675dae1c, type: 2}
+  _floatEventResponse:
+    m_PersistentCalls:
+      m_Calls: []
+  _stringEventResponse:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 1914146673}
+        m_TargetAssemblyTypeName: BtnFeedbackController, Assembly-CSharp
+        m_MethodName: OnWrongBtnMsgRcv
         m_Mode: 0
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
