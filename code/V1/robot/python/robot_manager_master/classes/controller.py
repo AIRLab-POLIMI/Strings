@@ -25,18 +25,31 @@ from utils.byte_helper import bytes_to_ints
 # the control values are always enums, with name:position couples. For each controller, each control value is
 # uniquely defined by its position value.
 
+# IMPORTANT: every time you create a new ControllerType, to use it you need to do the following:
+# - in all_controllers.py:
+#   - add the key:class couple to the all_controller_types dict
+#   - add the enum_name:key couple to the ControllerTypeKeys enum
+# - in main.py:
+#   - import the controller key and the enum of the value name:positions
+#     (ONLY if you need to specify the DOF-CONTROL mapping manually for that controller)
+# |
+# NB: some controllers may not have a static IP. Fro those controllers, the IP:class enum does not have an IP,
+#     but a unique identifier that tha Maestro will know to recognise.
+
 
 class Controller:
-    def __init__(self, control_values, ip=None):
+    def __init__(self, control_values, unique_id, static_ip=True):
         self.control_keys = control_values
-        self.ip = ip
+        self.id = unique_id
+        self.ip = unique_id
+        self.static_ip = static_ip
         self.position_dof_dict = dict()
 
     def set_ip(self, ip):
         self.ip = ip
 
     def add_control(self, control_id, dof):
-        # control id is already the position of the control value in the message
+        # control id is already the position of the control value in the message coming from the controller via udp.
         # check if the control_id is valid
         valid = False
         for position in self.control_keys:

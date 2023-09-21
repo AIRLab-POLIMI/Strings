@@ -25,5 +25,5 @@ class QuestControllerKeys(Enum):
 
 
 class OculusQuestController(Controller):
-    def __init__(self):
-        super().__init__(QuestControllerKeys)
+    def __init__(self, unique_id, static_ip=True):
+        super().__init__(QuestControllerKeys, unique_id, static_ip)

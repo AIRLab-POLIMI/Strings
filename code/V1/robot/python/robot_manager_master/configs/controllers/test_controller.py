@@ -3,7 +3,6 @@ from enum import Enum
 from classes.controller import Controller
 
 test_controller_key = 't'
-test_controller_ip = "192.168.1.64"
 
 
 class TestControllerKeys(Enum):
@@ -13,5 +12,5 @@ class TestControllerKeys(Enum):
 
 
 class TestController(Controller):
-    def __init__(self):
-        super().__init__(TestControllerKeys, test_controller_ip)
+    def __init__(self, unique_id, static_ip=True):
+        super().__init__(TestControllerKeys, unique_id, static_ip)

@@ -4,23 +4,26 @@ import time
 from classes.serial_channel import SerialChannel
 from classes.network_channel import NetworkChannel
 from utils.constants import DEFAULT_SERIAL_ELAPSED, DEFAULT_NETWORK_SEND_ELAPSED_SEC, DEFAULT_MAX_CONSECUTIVE_MSG_READS
-from configs.controllers.all_controllers import all_controllers
-from configs.controllers.quest_controller import quest_controller_key
+from configs.controllers.all_controllers import AllControllers, DynamicIpControllerKeys, get_controlled_by_id
 
 
 class Maestro:
     def __init__(self,
                  robot,
-                 quest_ip,
+                 quest_ip=None,
                  serial_elapsed=DEFAULT_SERIAL_ELAPSED,
                  network_send_elapsed=DEFAULT_NETWORK_SEND_ELAPSED_SEC):
 
         self.robot = robot
         self.quest_ip = quest_ip
+        # --- FLAGS
+        self.setup_complete = False
 
         # --- CONTROLLERS
-        self.controllers = dict()
-        self.controllers_ip = dict()
+        self.controllers_by_ip = dict()  # {controller_ip: controller object}
+        self.controllers_by_id = dict()  # {controller_id: controller object}
+        # we could avoid using two dicts if we make a search based on id on every "add_control" call.
+        self.controller_id_to_ip = dict()  # {controller_id: controller_ip} dict. For dynamic ip controllers
 
         # --- NETWORK COMMUNICATION
         self.network_channel = NetworkChannel(self.robot.ip)
@@ -45,6 +48,20 @@ class Maestro:
         for arduino_port in self.robot.sensor_arduino_ports:
             self.sensing_dict[self.arduino_channels[arduino_port]] = self.robot.sensing_dict[arduino_port]
 
+        # --- CHECKS
+        # all controllers with dynamic ip flag must have an id that is present in the DynamicIpControllerKeys enum.
+        # if this is not the case, print and exit the program
+        for controller in AllControllers:
+            if not controller.value.static_ip:
+                all_good = False
+                for dynamic_ip_controller_key in DynamicIpControllerKeys:
+                    if controller.value.unique_id == dynamic_ip_controller_key.value:
+                        all_good = True
+                        break
+                if not all_good:
+                    print(f"[ERROR][Maestro] Controller {controller.value.unique_id} has dynamic IP but its id is not in "
+                          f"DynamicIpControllerKeys enum. Please add it there.")
+                    exit(1)
 # - - - - -  - - - - -  - - - - -  - - - - -  - - - - -  - - - - -  - - - - -  - - - - - SERIAL
 
     def write_serial(self):
@@ -93,46 +110,70 @@ class Maestro:
 
     # - - - - -  - - - - -  - - - - -  - - - - -  - - - - -  - - - - -  - - - - -  - - - - - CONTROLLERS
 
-    def add_control(self, controller_key, control_id, dof_key):
+    def add_control(self, controller_id, control_id, dof_key):
         # input:
-        # - controller_id(string): the ID of the controller that sends the control signal/s
+        # - controller_id(string): the unique id of the controller that sends the control signal/s.
+        #               It's the IP for static ip controllers, and a unique key for dynamic ip controllers
         # - control_id(int): the ID of the specific control signal. It's the value of the enum of the control keys
         #               corresponding to the position of that control signal in the message.
         # - dof_key(string): the string key identifying the DOF that this control signal is mapped to
 
-        # 1. check if the corresponding controller object is already present in the list of active controllers
+        # 1. check if the corresponding controller object is already present in the list of active controllers-
+        #    a controller is uniquely identified by its ip. The only exception is quest controller, which my have no ip
+        #    at this point before setup. In that case, it is identified by its key.
         #    if not, create it
-        if controller_key not in self.controllers.keys():
-            try:
-                new_controller = all_controllers[controller_key]()
-                if controller_key == quest_controller_key:
-                    new_controller.set_ip(self.quest_ip)
-
-                    # TODO if self.quest_ip is set later,
-                    # TODO this if will just skip over and when quest ip is set this controller needs to be updated
-
-                # else it should already have a set ip
-                elif new_controller.ip is None:
-                    print(f"[MAESTRO][ADD CONTROL] - ERROR: controller with key '{controller_key}' has no IP set it. "
-                          f"Skipping setup")
-                    return
-
-                self.controllers[controller_key] = new_controller
-                self.controllers_ip[new_controller.ip] = new_controller
-
-            except Exception as e:
-                print(f"[MAESTRO][ADD CONTROL] - ERROR: controller with key '{controller_key}' not found in "
-                      f"all_controllers.py. Exception: {e}")
+        if controller_id not in self.controllers_by_id.keys():
+            new_controller = get_controlled_by_id(controller_id)
+            if new_controller is None:
+                print(f"[MAESTRO][ADD CONTROL] - ERROR: controller with id '{controller_id}' not found in "
+                      f"'AllControllers' Enum in 'all_controllers.py'")
                 return
 
-        # 2. add the position:dof couple to the dict
+            self.controllers_by_id[controller_id] = new_controller
+
+            # 2. if it wasn't present among the controllers:
+            #    if it's a static ip controller, add it to the IP:control dict.
+            #    if it's a dynamic ip controller, add it to the ID:control dict ONLY if setup has been completed.
+            if self.controllers_by_id[controller_id].static_ip:
+                self.controllers_by_ip[new_controller.ip] = new_controller
+            elif self.setup_complete:
+                try:
+                    self.controllers_by_ip[self.controller_id_to_ip[controller_id]] = new_controller
+                except Exception as e:
+                    print(f"[MAESTRO][ADD CONTROL] - ERROR: setup complete but controller with id '{controller_id}' not found in "
+                          f"'controller_id_ip' dict. Exception: {e}. Exiting program.")
+                    exit(1)
+
+        # 3. add the position:dof couple to the dict
         try:
-            self.controllers[controller_key].add_control(control_id, self.robot.dofs[dof_key])
+            self.controllers_by_id[controller_id].add_control(control_id, self.robot.dofs[dof_key])
 
         except Exception as e:
             print(f"[MAESTRO][ADD CONTROL] - ERROR: dof with key '{dof_key}' not found in "
                   f"robot.dofs. Exception: {e}")
             return
+
+    def setup_controllers(self):
+        # setup the IPs of all the controllers in the controller_id dict that have dynamic ip,
+        # populating the controller_id_ip dict.
+        # This needs to be done one by one.
+
+        # -- QUEST --
+        # LOGIC TO GET DYNAMIC QUEST IP HERE (or in a previous setup method)
+        # then, use the quest_ip
+        if self.quest_ip is not None:
+            self.controller_id_to_ip[DynamicIpControllerKeys.OculusQuest.value] = self.quest_ip
+        self.controllers_by_ip[self.quest_ip] = self.controllers_by_id[DynamicIpControllerKeys.OculusQuest.value]
+
+        # -- FINAL CHECK --
+        # check that all the controllers in the controller_id dict are also in the controller_ip dict
+        # if not, it means that they are dynamic ip controllers and setup has not been completed:
+        # in that case, print and exit
+        for ip_id, controller in self.controllers_by_id.items():
+            if controller not in self.controllers_by_ip.items():
+                print(f"[MAESTRO][SETUP CONTROLLERS] - ERROR: controller with id '{ip_id}' not found in "
+                      f"'controller_ip' dict. Setup has not been completed. Exiting program.")
+                exit(1)
 
     # - - - - -  - - - - -  - - - - -  - - - - -  - - - - -  - - - - -  - - - - -  - - - - - NETWORK
 
@@ -154,8 +195,8 @@ class Maestro:
                   f"message from IP: ", sender_ip,
                   " - and PORT: ", self.network_channel.udp_data[1][1])
 
-            if sender_ip in self.controllers.keys():
-                self.controllers_ip[sender_ip].on_msg_received(self.network_channel.udp_data[0])
+            if sender_ip in self.controllers_by_ip.keys():
+                self.controllers_by_ip[sender_ip].on_msg_received(self.network_channel.udp_data[0])
 
             num_read += 1
             if num_read > DEFAULT_MAX_CONSECUTIVE_MSG_READS:
@@ -179,6 +220,10 @@ class Maestro:
             arduino_channel.setup_serial()
 
         self.network_channel.setup_udp()
+
+        self.setup_controllers()
+
+        self.setup_complete =  True
 
     def loop(self):
         # if keyboard.is_pressed('q'):
