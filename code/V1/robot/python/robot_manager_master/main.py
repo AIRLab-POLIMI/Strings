@@ -20,17 +20,21 @@ robot = test_robot
 # setup the orchestrator of the robot
 maestro = Maestro(robot, quest_ip)
 
+
 # setup the controllers:
 # 'maestro.add_control(AllController.yourcontrollername.value.id, control_id, dof_key)'
 #
 # test robot
-maestro.add_control(AllControllers.SingleValueController1.value.id,
-                    SingleValueControllerKeys.VAL.value, petals_dof_key)
+def setup_controls():
+    maestro.add_control(AllControllers.SingleValueController1.value.id,
+                        SingleValueControllerKeys.VAL.value, petals_dof_key)
 
 # - - - - -  - - - - -  - - - - -  - - - - -  - - - - -  - - - - -  - - - - -  - - - - - MAIN
 
 
 def main():
+    setup_controls()
+
     maestro.setup()
 
     while True:

@@ -76,11 +76,8 @@ class EspNetworkChannel {
                 Serial.print(WiFi.status());
                 Serial.println("/");
                 Serial.println(WL_CONNECTED);
+                delay(500);
             }
-
-            // turn WIFI led OFF.
-            // so, if LED stays off after blinking, it's because the UDP connection crashed the ESP
-            digitalWrite(m_ledPinWiFi, LOW);
 
             // notify being connected to WiFi;
             Serial.print("Connected to Local Network - ESP IP: ");
@@ -245,15 +242,19 @@ class EspNetworkChannel {
             UDP.endPacket();
         }
     
-        void write_control_values_udp(ControlValue * control_values[], int num_control_values, IPAddress ip, int port) {
+        void write_control_values_udp(ControlValue* control_values[], int num_control_values, IPAddress ip, int port) {
             UDP.beginPacket(ip, port);
             for (int i = 0; i < num_control_values; i++) {
+                Serial.print(" [write_control_values_udp] Writing control value ");
+                Serial.print(i);
+                Serial.print(" - value: ");
+                Serial.println(control_values[i]->CurrentValue());
                 UDP.write(control_values[i]->CurrentValue());
             }
             UDP.endPacket();
         }
 
-        void write_control_values_udp(ControlValue * control_values[], int num_control_values) {
+        void write_control_values_udp(ControlValue* control_values[], int num_control_values) {
             write_control_values_udp(control_values, num_control_values, m_defaultDestinationIP, m_defaultDestinationPort);
         }
 

@@ -23,20 +23,25 @@ public class InputManager : Monosingleton<InputManager>
 
     
     #region Event Functions
-    
-        void FixedUpdate()
+
+
+    void FixedUpdate()
         {
             // Send the camera's X and Y angles via UDP every 0.05 seconds
             if (Time.time - _prevSendTime > deltaSendTime)
             {
                 // NetworkManager.Instance.SendMsg(GetUdpMessage());
-                UDPManager.Instance.SendStringUpdToDefaultEndpoint(GetUdpMessage());
+                string msgToSend = RoutineController.Instance.IsRunning 
+                    ? RoutineController.Instance.GetMsg() 
+                    : GetUdpMessage();
+                
+                UDPManager.Instance.SendStringUpdToDefaultEndpoint(msgToSend);
                 _prevSendTime = Time.time;
             }
         }
     
     #endregion
-        
+    
 
     #region Compose UDP Mess
 

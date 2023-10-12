@@ -38,10 +38,10 @@ from utils.byte_helper import bytes_to_ints
 
 
 class Controller:
-    def __init__(self, control_values, unique_id, static_ip=True):
+    def __init__(self, control_values, controller_id, static_ip=True):
         self.control_keys = control_values
-        self.id = unique_id
-        self.ip = unique_id
+        self.id = controller_id
+        self.ip = controller_id
         self.static_ip = static_ip
         self.position_dof_dict = dict()
 

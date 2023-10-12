@@ -8,19 +8,17 @@
 
 class ControlValue
 {
-private:
+    protected:
 
-    uint8_t _current_value;
+        uint8_t _current_value;
 
-public:
+    public:
 
-    uint8_t CurrentValue() {
-        return _current_value;
-    }
+        uint8_t CurrentValue() {
+            return _current_value;
+        }
 
-    void UpdateValue() {
-
-    }
+        virtual void UpdateValue() = 0; // Pure virtual function (abstract)
 };
 
 #endif

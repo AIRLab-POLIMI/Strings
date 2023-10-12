@@ -10,7 +10,6 @@ class PotentiometerControlValue : public ControlValue
 {
 private:
 
-    uint8_t _current_value;
     uint8_t _pin;
     float _normRange;
 
@@ -28,12 +27,11 @@ public:
         _normRange = 255.0/4095.0;
     }
 
-    uint8_t CurrentValue() {
-        return _current_value;
-    }
-
-    void UpdateValue() {
+    void UpdateValue() override {
+        // Serial.print("   [potentiometer control value][UpdateValue] Reading from pin ");
+        // Serial.println(_pin);
         Map(analogRead(_pin));
+        Serial.println(_current_value);
     }
 };
 

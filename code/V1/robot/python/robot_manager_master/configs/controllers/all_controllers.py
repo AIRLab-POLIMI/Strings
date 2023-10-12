@@ -24,12 +24,12 @@ class DynamicIpControllerKeys(Enum):
 # - if IPs are dynamic: use as IP a unique identifier, and "static_ip" is False by default
 #   the maestro will check with all of them in SETUP and knows how to set the ip
 class AllControllers(Enum):
-    SingleValueController1 = SingleValueController("192.168.1.60")
+    SingleValueController1 = SingleValueController("192.168.0.105")
     OculusQuestController = OculusQuestController(DynamicIpControllerKeys.OculusQuest.value, static_ip=False)
 
 
-def get_controlled_by_id(unique_id):
+def get_controlled_by_id(controller_id):
     for controller in AllControllers:
-        if controller.value.unique_id == unique_id:
+        if controller.value.id == controller_id:
             return controller.value
     return None

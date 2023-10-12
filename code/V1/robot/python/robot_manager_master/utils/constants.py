@@ -13,7 +13,7 @@ DEFAULT_SERIAL_ELAPSED = 0.02  # in seconds
 DEFAULT_ESP_PORT = 4210
 
 # Listen on Port: DEFAULT PORT of the socket connection of the raspberry
-default_rasp_port = 44444
+default_robot_port = 44444
 # Size of receive buffer
 default_buffer_size = 1024
 

@@ -1,14 +1,14 @@
 
 import socket
 import time
-from utils.constants import default_rasp_port, default_buffer_size
+from utils.constants import default_robot_port, default_buffer_size
 
 
 class NetworkChannel:
 
     def __init__(self,
                  my_ip,
-                 my_port=default_rasp_port,
+                 my_port=default_robot_port,
                  buffer_size=default_buffer_size):
         # socket parameters
         self.my_ip = my_ip

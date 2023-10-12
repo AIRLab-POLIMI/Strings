@@ -55,7 +55,7 @@ class Maestro:
             if not controller.value.static_ip:
                 all_good = False
                 for dynamic_ip_controller_key in DynamicIpControllerKeys:
-                    if controller.value.unique_id == dynamic_ip_controller_key.value:
+                    if controller.value.id == dynamic_ip_controller_key.value:
                         all_good = True
                         break
                 if not all_good:
@@ -68,6 +68,7 @@ class Maestro:
         # for each arduino channel of the control channels, write as many bytes as there are DOFs in the list
         for arduino_channel in self.control_dict.keys():
             # write a single message with all the bytes, one for each DOF of this channel
+            # pass
             arduino_channel.write_bytes_int([dof.get_message() for dof in self.control_dict[arduino_channel]])
 
     def read_serial(self):
@@ -131,6 +132,10 @@ class Maestro:
 
             self.controllers_by_id[controller_id] = new_controller
 
+            # print info of the new controller, including if it has static ip
+            print(f"[Maestro][add_control] adding new controller with ip: {new_controller.ip} - "
+                  f"static ip: {new_controller.static_ip}")
+
             # 2. if it wasn't present among the controllers:
             #    if it's a static ip controller, add it to the IP:control dict.
             #    if it's a dynamic ip controller, add it to the ID:control dict ONLY if setup has been completed.
@@ -163,14 +168,15 @@ class Maestro:
         # then, use the quest_ip
         if self.quest_ip is not None:
             self.controller_id_to_ip[DynamicIpControllerKeys.OculusQuest.value] = self.quest_ip
-        self.controllers_by_ip[self.quest_ip] = self.controllers_by_id[DynamicIpControllerKeys.OculusQuest.value]
+        if DynamicIpControllerKeys.OculusQuest.value in self.controllers_by_id.keys():
+            self.controllers_by_ip[self.quest_ip] = self.controllers_by_id[DynamicIpControllerKeys.OculusQuest.value]
 
         # -- FINAL CHECK --
         # check that all the controllers in the controller_id dict are also in the controller_ip dict
         # if not, it means that they are dynamic ip controllers and setup has not been completed:
         # in that case, print and exit
         for ip_id, controller in self.controllers_by_id.items():
-            if controller not in self.controllers_by_ip.items():
+            if controller not in self.controllers_by_ip.values():
                 print(f"[MAESTRO][SETUP CONTROLLERS] - ERROR: controller with id '{ip_id}' not found in "
                       f"'controller_ip' dict. Setup has not been completed. Exiting program.")
                 exit(1)
@@ -191,11 +197,13 @@ class Maestro:
         num_read = 0
         while self.network_channel.read_udp_non_blocking():
             sender_ip = self.network_channel.udp_data[1][0]
-            print(f"[maestro][network_communication] - "
-                  f"message from IP: ", sender_ip,
-                  " - and PORT: ", self.network_channel.udp_data[1][1])
+            # print(f"[maestro][network_communication] - "
+            #       f"message from IP: ", sender_ip,
+            #       " - and PORT: ", self.network_channel.udp_data[1][1])
 
             if sender_ip in self.controllers_by_ip.keys():
+                # print(f"[maestro][network_communication] - "
+                #       f"received data: '{self.network_channel.udp_data[0]} from controller with ip: '{sender_ip}")
                 self.controllers_by_ip[sender_ip].on_msg_received(self.network_channel.udp_data[0])
 
             num_read += 1

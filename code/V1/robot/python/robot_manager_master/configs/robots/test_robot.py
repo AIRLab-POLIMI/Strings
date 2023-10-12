@@ -8,7 +8,7 @@ from configs.dof_keys import *
 # config file for test robot made of 2 servos
 
 # 0. IP
-test_robot_ip = "192.168.1.64"
+test_robot_ip = "192.168.0.102"
 
 # A. DOFS
 servo1_dof = Dof(petals_dof_key)
@@ -16,7 +16,7 @@ servo2_dof = Dof(busto_dof_key)
 
 # B. CONTROL DICT
 control_dict = {
-    "/dev/cu.usbmodem14101": [servo1_dof, servo2_dof]
+    "/dev/cu.usbmodem14201": [servo1_dof, servo2_dof]
 }
 
 # C. SENSORS

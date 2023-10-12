@@ -2,7 +2,7 @@
 import time
 import keyboard
 
-from utils.constants import default_rasp_port
+from utils.constants import default_robot_port
 from classes.network_channel import NetworkChannel
 from classes.input_values import InputValues, InputValue
 from utils.byte_helper import int_list_to_bytes
@@ -13,7 +13,7 @@ ip_address = "127.0.0.1"
 port = 12345  # Replace with the actual port your program uses
 
 destination_ip = ""
-destination_port = default_rasp_port
+destination_port = default_robot_port
 
 
 network_channel = NetworkChannel(ip_address, port)
