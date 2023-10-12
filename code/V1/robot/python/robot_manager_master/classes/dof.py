@@ -2,9 +2,13 @@
 from utils.math_helper import map_range
 
 
+# DOF is the class with the value of a single SLAVE DOF. The SLAVE (e.g. Arduino) recevies these values,
+# rescales them, and then assigns them to the corresponding actuator (e.g. Motor, Light, Sound..) without
+# any additional computation.
+
+
 # the incoming value from the sensor is always between 0 and 255, covering the entire range of the sensor.
 # The DOF class is responsible for converting this value to the range of the dof itself.
-
 
 # the most basic DOF just sends to arduino the raw control value in [0, 255], and arduino will rescale it to its range
 
@@ -27,6 +31,7 @@ class Dof:
         return self.current_value
 
 
+# FOR INSANE ATTEMPTS AT OPTIMISATION
 # Class to represent a degree of freedom composed of a single servo motor. It contains the min and max values.
 # Based on the min and max values, the DOF knows how to behave when sending values to the servo motor.
 # Values sent are always between 0 and 255. min >= 0 always, they are always positive angles (0 to 360 degrees).

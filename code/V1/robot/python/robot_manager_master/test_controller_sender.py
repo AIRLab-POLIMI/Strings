@@ -4,7 +4,7 @@ import keyboard
 
 from utils.constants import default_robot_port
 from classes.network_channel import NetworkChannel
-from classes.input_values import InputValues, InputValue
+from utils.test.input_values import InputValues, InputValue
 from utils.byte_helper import int_list_to_bytes
 
 

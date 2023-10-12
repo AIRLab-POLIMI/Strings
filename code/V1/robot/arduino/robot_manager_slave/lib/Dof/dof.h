@@ -5,22 +5,6 @@
 #include <Servo.h>
 
 
-// define abstract class dof
-class dof {
-  public:
-    // constructor
-    dof();
- 
-  private:
-    // servo
-    Servo _servo;
-    // min value
-    int _min;
-    // max value
-    int _max;
-};
-
-
 class BasicDof {
   protected:
 
@@ -28,6 +12,7 @@ class BasicDof {
     int _max;
     float _normRange;
 
+    uint8_t _prevValueRaw;
     int _currentValue;
 
   public: 
@@ -37,9 +22,14 @@ class BasicDof {
       _normRange = (max - min)/255.0;
     }
 
-    void OnNewValueReceived(uint8_t value) {
-      // map the value from 0-255 to min-max
-      int _currentValue =  static_cast<int>(value * _normRange) + _min;
+    bool OnNewValueReceived(uint8_t value) {
+      // IF the value is new, map the value from 0-255 to min-max
+      if (value != _prevValueRaw){
+        _currentValue =  static_cast<int>(value * _normRange) + _min;
+        _prevValueRaw = value;
+        return true;
+      }
+      return false;
     }
 };
 
@@ -50,8 +40,6 @@ class BasicServoDof : public BasicDof {
     int _pin;
     // servo
     Servo _servo;
-    // prev value
-    int _prevValue;
 
   public:
     // implement constructor
@@ -61,42 +49,15 @@ class BasicServoDof : public BasicDof {
 
     void Setup() {
       _servo.attach(_pin);
-      _prevValue = _min - 1; // initialise the prev value to a value that is different from any possible input value
     }
 
     void OnNewValueReceived(uint8_t value) {
       // call the parent method
-      BasicDof::OnNewValueReceived(value);
-      // write the value to the servo if the value has changed
-      if (_currentValue != _prevValue) {
+      // write the value to the servo if the value has changed. 
+      // NB check happens in the PARENT method using the raw value
+      if (BasicDof::OnNewValueReceived(value))
         _servo.write(_currentValue);
-        _prevValue = _currentValue;
-      }
     }
-};
-
-class ServoDof {
-
-  public:
-  
-    void Setup(int pin) {
-        _pin = pin;
-        _servo.attach(_pin);
-        _currentAngle = -1;
-    }
-
-    void OnNewValueReceived(int value){
-        if (value != _currentAngle) {
-          _currentAngle = value;
-          _servo.write(_currentAngle);
-        }
-    }
-
-  private:
-    // servo
-    int _pin;
-    Servo _servo;
-    int _currentAngle;
 };
 
 

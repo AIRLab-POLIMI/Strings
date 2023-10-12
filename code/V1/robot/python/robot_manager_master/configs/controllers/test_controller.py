@@ -1,6 +1,6 @@
 
 from enum import Enum
-from classes.controller import Controller
+from classes.controller_byte import Controller
 
 test_controller_key = 't'
 

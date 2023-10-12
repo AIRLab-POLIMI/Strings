@@ -1,5 +1,5 @@
 
-from classes.controller import Controller
+from classes.controller_byte import Controller
 from enum import Enum
 
 
