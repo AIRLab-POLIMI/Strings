@@ -1,24 +1,19 @@
 
 from classes.maestro import Maestro
 
-from configs.robots.test_robot import test_robot
+from configs.robots.odile import odile
 
-from configs.controllers.all_controllers import *
-from configs.controllers.single_value_controller import SingleValueControllerKeys
-
-from configs.dof_keys import *
+from configs.keys.control_value_keys import *
 
 # - - - - -  - - - - -  - - - - -  - - - - -  - - - - -  - - - - -  - - - - -  - - - - - SETUP
 
-quest_ip = "192.168.0.101"
-
-
 # setup robot and default controllers
 # robot = siid
-robot = test_robot
+# robot = test_robot
+robot = odile
 
 # setup the orchestrator of the robot
-maestro = Maestro(robot, quest_ip)
+maestro = Maestro(robot)
 
 
 # setup the controllers:
@@ -26,8 +21,7 @@ maestro = Maestro(robot, quest_ip)
 #
 # test robot
 def setup_controls():
-    maestro.add_control(AllControllers.SingleValueController1.value.id,
-                        SingleValueControllerKeys.VAL.value, petals_dof_key)
+    maestro.set_control_mapping(, petals_dof_key)
 
 # - - - - -  - - - - -  - - - - -  - - - - -  - - - - -  - - - - -  - - - - -  - - - - - MAIN
 

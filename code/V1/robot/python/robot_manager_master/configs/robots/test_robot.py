@@ -1,8 +1,7 @@
 
 from classes.robot import Robot
 from classes.dof import Dof
-from classes.sensor import InSensorSerial
-from configs.dof_keys import *
+from configs.keys.control_value_keys import *
 
 
 # config file for test robot made of 2 servos

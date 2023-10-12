@@ -20,28 +20,11 @@ default_buffer_size = 1024
 DEFAULT_NETWORK_SEND_ELAPSED_SEC = 0.02  # in seconds
 DEFAULT_MAX_CONSECUTIVE_MSG_READS = 3
 
-# -- UDP MESSAGES
-#
-# - RASP-TO-ESP MESSAGES
-RASP_AKNOWLEDGE = b"OK"
-#
-# - ESP-TO-RASP MESSAGES
-# ESP presentation MSG
-# the message received when esps are presenting themselves
-esp_presentation_msg = "hallo"
-#
-# PRIORITY UDP MESSAGES: messages coming from socket COMM that have custom responses
-net_reset_msg = "RESET"
-net_quit_msg = "QUIT"
-net_pause_msg = "PAUSE"
-net_resume_msg = "RESUME"
-# place them all in a list to check whether all are present at UDPEsp object initialization
-priority_msgs = [net_reset_msg, net_quit_msg, net_pause_msg, net_resume_msg]
+DELIMITER = ":"
+MSG_DELIMITER = '_'
 
 # --------------------------------------------------------- CONTROL
 
 min_control_value = 0
 max_control_value = 255
-
-
 

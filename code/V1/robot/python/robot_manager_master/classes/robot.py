@@ -10,8 +10,11 @@
 
 
 class Robot:
-    def __init__(self, ip, control_dict, sensing_dict):
+    def __init__(self, ip, control_dict, sensing_dict, control_channels):
         self.control_dict = control_dict
+
+        self.control_channels = control_channels
+
         self.sensing_dict = sensing_dict
 
         self.control_arduino_ports = list(self.control_dict.keys())
@@ -31,6 +34,11 @@ class Robot:
         for arduino_port in self.sensor_arduino_ports:
             for sensor in self.sensing_dict[arduino_port]:
                 self.sensors[sensor.key] = sensor
+
+        self.control_key_channels = dict()
+        for control_channel in self.control_channels:
+            for control_key in control_channel.keys:
+                self.control_channels[control_key] = control_channel
 
         self.num_dofs = len(self.dofs)
         self.num_sensors = len(self.sensors)

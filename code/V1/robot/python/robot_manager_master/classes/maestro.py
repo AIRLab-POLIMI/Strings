@@ -4,18 +4,17 @@ import time
 from classes.serial_channel import SerialChannel
 from classes.network_channel import NetworkChannel
 from utils.constants import DEFAULT_SERIAL_ELAPSED, DEFAULT_NETWORK_SEND_ELAPSED_SEC, DEFAULT_MAX_CONSECUTIVE_MSG_READS
-from configs.controllers.all_controllers import AllControllers, DynamicIpControllerKeys, get_controlled_by_id
+from utils.messaging_helper import parse_byte_message
+from utils.bkp.controllers.all_controllers import AllControllers, DynamicIpControllerKeys
 
 
 class Maestro:
     def __init__(self,
                  robot,
-                 quest_ip=None,
                  serial_elapsed=DEFAULT_SERIAL_ELAPSED,
                  network_send_elapsed=DEFAULT_NETWORK_SEND_ELAPSED_SEC):
 
         self.robot = robot
-        self.quest_ip = quest_ip
         # --- FLAGS
         self.setup_complete = False
 
@@ -48,6 +47,12 @@ class Maestro:
         for arduino_port in self.robot.sensor_arduino_ports:
             self.sensing_dict[self.arduino_channels[arduino_port]] = self.robot.sensing_dict[arduino_port]
 
+        # --- CONTROL CHANNELS
+        # maps the keys of the control signal (the incoming value)
+        # to the ControlChannel object containing the corresponding ControlValue object
+        self.control_values = dict()  # {Control signal key: ControlChannel object}
+        # this will be updated every time a new mapping is assigned in the "set_control_mapping" method
+
         # --- CHECKS
         # all controllers with dynamic ip flag must have an id that is present in the DynamicIpControllerKeys enum.
         # if this is not the case, print and exit the program
@@ -65,14 +70,18 @@ class Maestro:
 # - - - - -  - - - - -  - - - - -  - - - - -  - - - - -  - - - - -  - - - - -  - - - - - SERIAL
 
     def write_serial(self):
-        # for each arduino channel of the control channels, write as many bytes as there are DOFs in the list
+        # A - for each control channel, call the UPDATE DOF method to get the current dof values
+        for control_channel in self.robot.control_channels.values():
+            control_channel.update_dof_values()
+
+        # B - for each arduino channel of the control channels, write as many bytes as there are DOFs in the list
         for arduino_channel in self.control_dict.keys():
             # write a single message with all the bytes, one for each DOF of this channel
             # pass
             arduino_channel.write_bytes_int([dof.get_message() for dof in self.control_dict[arduino_channel]])
 
     def read_serial(self):
-        self.index += 1  # for debugging
+        # self.index += 1  # for debugging
         # print(f"[MAIN][read_serial] --- READ {index}: ")
 
         # for each arduino channel of the sensor channels, read as many bytes as there are Sensors in the list
@@ -111,80 +120,17 @@ class Maestro:
 
     # - - - - -  - - - - -  - - - - -  - - - - -  - - - - -  - - - - -  - - - - -  - - - - - CONTROLLERS
 
-    def add_control(self, controller_id, control_id, dof_key):
-        # input:
-        # - controller_id(string): the unique id of the controller that sends the control signal/s.
-        #               It's the IP for static ip controllers, and a unique key for dynamic ip controllers
-        # - control_id(int): the ID of the specific control signal. It's the value of the enum of the control keys
-        #               corresponding to the position of that control signal in the message.
-        # - dof_key(string): the string key identifying the DOF that this control signal is mapped to
+    def set_control_mapping(self, control_signal_key, control_value_key):
+        # get the ControlChannel object corresponding to the control value key
+        control_channel = self.robot.control_key_channels[control_value_key]
 
-        # 1. check if the corresponding controller object is already present in the list of active controllers-
-        #    a controller is uniquely identified by its ip. The only exception is quest controller, which my have no ip
-        #    at this point before setup. In that case, it is identified by its key.
-        #    if not, create it
-        if controller_id not in self.controllers_by_id.keys():
-            new_controller = get_controlled_by_id(controller_id)
-            if new_controller is None:
-                print(f"[MAESTRO][ADD CONTROL] - ERROR: controller with id '{controller_id}' not found in "
-                      f"'AllControllers' Enum in 'all_controllers.py'")
-                return
-
-            self.controllers_by_id[controller_id] = new_controller
-
-            # print info of the new controller, including if it has static ip
-            print(f"[Maestro][add_control] adding new controller with ip: {new_controller.ip} - "
-                  f"static ip: {new_controller.static_ip}")
-
-            # 2. if it wasn't present among the controllers:
-            #    if it's a static ip controller, add it to the IP:control dict.
-            #    if it's a dynamic ip controller, add it to the ID:control dict ONLY if setup has been completed.
-            if self.controllers_by_id[controller_id].static_ip:
-                self.controllers_by_ip[new_controller.ip] = new_controller
-            elif self.setup_complete:
-                try:
-                    self.controllers_by_ip[self.controller_id_to_ip[controller_id]] = new_controller
-                except Exception as e:
-                    print(f"[MAESTRO][ADD CONTROL] - ERROR: setup complete but controller with id '{controller_id}' not found in "
-                          f"'controller_id_ip' dict. Exception: {e}. Exiting program.")
-                    exit(1)
-
-        # 3. add the position:dof couple to the dict
-        try:
-            self.controllers_by_id[controller_id].add_control(control_id, self.robot.dofs[dof_key])
-
-        except Exception as e:
-            print(f"[MAESTRO][ADD CONTROL] - ERROR: dof with key '{dof_key}' not found in "
-                  f"robot.dofs. Exception: {e}")
-            return
-
-    def setup_controllers(self):
-        # setup the IPs of all the controllers in the controller_id dict that have dynamic ip,
-        # populating the controller_id_ip dict.
-        # This needs to be done one by one.
-
-        # -- QUEST --
-        # LOGIC TO GET DYNAMIC QUEST IP HERE (or in a previous setup method)
-        # then, use the quest_ip
-        if self.quest_ip is not None:
-            self.controller_id_to_ip[DynamicIpControllerKeys.OculusQuest.value] = self.quest_ip
-        if DynamicIpControllerKeys.OculusQuest.value in self.controllers_by_id.keys():
-            self.controllers_by_ip[self.quest_ip] = self.controllers_by_id[DynamicIpControllerKeys.OculusQuest.value]
-
-        # -- FINAL CHECK --
-        # check that all the controllers in the controller_id dict are also in the controller_ip dict
-        # if not, it means that they are dynamic ip controllers and setup has not been completed:
-        # in that case, print and exit
-        for ip_id, controller in self.controllers_by_id.items():
-            if controller not in self.controllers_by_ip.values():
-                print(f"[MAESTRO][SETUP CONTROLLERS] - ERROR: controller with id '{ip_id}' not found in "
-                      f"'controller_ip' dict. Setup has not been completed. Exiting program.")
-                exit(1)
+        # assign to the control channel dict the control signal key
+        self.control_values[control_signal_key] = control_channel.control_value_dict[control_value_key]
 
     # - - - - -  - - - - -  - - - - -  - - - - -  - - - - -  - - - - -  - - - - -  - - - - - NETWORK
 
     # network communication does two things:
-    #   - it receives messages from the controllers and updates the corresponding current DOF values
+    #   - it receives messages from the remote controllers and passes them to the corresponding ControlChannel
     #   - it sends messages to the feedback system with the OutSensor values
     # the two tasks are performed with different frequencies:
     #   - checking input UDP messages is done at every loop iteration
@@ -196,15 +142,26 @@ class Maestro:
         # A read from udp, at every iteration read everything there is to read
         num_read = 0
         while self.network_channel.read_udp_non_blocking():
-            sender_ip = self.network_channel.udp_data[1][0]
-            # print(f"[maestro][network_communication] - "
-            #       f"message from IP: ", sender_ip,
-            #       " - and PORT: ", self.network_channel.udp_data[1][1])
 
-            if sender_ip in self.controllers_by_ip.keys():
-                # print(f"[maestro][network_communication] - "
-                #       f"received data: '{self.network_channel.udp_data[0]} from controller with ip: '{sender_ip}")
-                self.controllers_by_ip[sender_ip].on_msg_received(self.network_channel.udp_data[0])
+            # 1. try to get key-value messages
+            key_value_msgs = parse_byte_message(self.network_channel.udp_data[0])
+            # 2. if there is at least a key-value message, update the corresponding controller
+            if key_value_msgs is not None:
+                for key, value in key_value_msgs.items():
+                    # print(f"[maestro][network_communication] - "
+                    #       f"received key: '{key}' with value: '{value}' "
+                    #       f"from controller with ip: {self.network_channel.udp_data[1][0]}")
+                    if key in self.control_values.keys():
+                        self.control_values[key].on_msg_received(value)
+                    else:
+                        print(f"[maestro][network_communication] - "
+                              f"received key: '{key}' with value: '{value}' "
+                              f"from controller with ip: '{self.network_channel.udp_data[1][0]}' "
+                              f"but this key is not in the control_keys_dict. "
+                              f"Please add it to the control_keys_dict in the constructor of Maestro.")
+                num_read += 1
+                if num_read > DEFAULT_MAX_CONSECUTIVE_MSG_READS:
+                    break
 
             num_read += 1
             if num_read > DEFAULT_MAX_CONSECUTIVE_MSG_READS:
@@ -229,7 +186,7 @@ class Maestro:
 
         self.network_channel.setup_udp()
 
-        self.setup_controllers()
+        # self.setup_controllers()
 
         self.setup_complete =  True
 

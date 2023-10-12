@@ -1,9 +1,8 @@
 
 from enum import Enum
 
-from configs.controllers.quest_controller import OculusQuestController, quest_controller_key
-from configs.controllers.test_controller import TestController, test_controller_key
-from configs.controllers.single_value_controller import SingleValueController, single_value_controller_key
+from utils.bkp.controllers.quest_controller import OculusQuestController
+from utils.bkp.controllers.single_value_controller import SingleValueController
 
 
 # this is a dictionary of all the controllers.

@@ -3,7 +3,7 @@ import time
 from classes.serial_channel import SerialChannel
 from classes.network_channel import NetworkChannel
 from utils.constants import DEFAULT_SERIAL_ELAPSED, DEFAULT_NETWORK_SEND_ELAPSED_SEC, DEFAULT_MAX_CONSECUTIVE_MSG_READS
-from configs.controllers.all_controllers import AllControllers, DynamicIpControllerKeys, get_controlled_by_id
+from utils.bkp.controllers.all_controllers import AllControllers, DynamicIpControllerKeys, get_controlled_by_id
 
 
 class Maestro:
