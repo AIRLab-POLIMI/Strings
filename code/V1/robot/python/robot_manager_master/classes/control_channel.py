@@ -59,6 +59,10 @@ class SingleControlChannel(ControlChannel):
 
         if dirty:
             self.dof.value = self.control_value.get_current_value()  # this method cleans the dirty flag
+            print(f"[SingleControlChannel][update_dofs] - "
+                  f"key: {self.control_value.key} - "
+                  f"signal key: {self.control_value.control_signal_key} "
+                  f"new val: {self.dof.value} - dirty: {self.dof.dirty}")
 
 
 class PassThroughControlChannel(ControlChannel):

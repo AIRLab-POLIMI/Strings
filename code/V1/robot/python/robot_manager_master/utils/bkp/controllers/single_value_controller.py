@@ -1,5 +1,5 @@
 
-from utils.bkp.controller_byte import Controller
+from utils.bkp.controller_byte import ControllerByte
 from enum import Enum
 
 
@@ -10,6 +10,6 @@ class SingleValueControllerKeys(Enum):
     VAL = 0
 
 
-class SingleValueController(Controller):
+class SingleValueController(ControllerByte):
     def __init__(self, unique_id, static_ip=True):
         super().__init__(SingleValueControllerKeys, unique_id, static_ip)

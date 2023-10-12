@@ -3,7 +3,8 @@
 
 # oculus quest controller
 # head
-
+HEAD_X_KEY = 'hx'
+HEAD_Y_KEY = 'hy'
 # right
 ACC_RIGHT_JOY_VR_X_KEY = 'Rrx'
 ACC_RIGHT_JOY_VR_Y_KEY = 'Rry'

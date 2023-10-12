@@ -4,6 +4,7 @@ from classes.maestro import Maestro
 from configs.robots.odile import odile
 
 from configs.keys.control_value_keys import *
+from configs.keys.control_signal_keys import *
 
 # - - - - -  - - - - -  - - - - -  - - - - -  - - - - -  - - - - -  - - - - -  - - - - - SETUP
 
@@ -21,10 +22,16 @@ maestro = Maestro(robot)
 #
 # test robot
 def setup_controls():
-    maestro.set_control_mapping(, petals_dof_key)
+    # --> control_signal_key, control_value_key <--
+
+    # head
+    maestro.set_control_mapping(HEAD_X_KEY, eye_x_dof_key)
+    maestro.set_control_mapping(HEAD_Y_KEY, eye_y_dof_key)
+
+    maestro.set_control_mapping(JOY_LEFT_VR_X_KEY, rotation_dof_key)
+    maestro.set_control_mapping(JOY_LEFT_VR_Y_KEY, forward_dof_key)
 
 # - - - - -  - - - - -  - - - - -  - - - - -  - - - - -  - - - - -  - - - - -  - - - - - MAIN
-
 
 def main():
     setup_controls()

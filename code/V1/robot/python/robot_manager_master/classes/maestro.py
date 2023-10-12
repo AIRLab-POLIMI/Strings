@@ -5,7 +5,6 @@ from classes.serial_channel import SerialChannel
 from classes.network_channel import NetworkChannel
 from utils.constants import DEFAULT_SERIAL_ELAPSED, DEFAULT_NETWORK_SEND_ELAPSED_SEC, DEFAULT_MAX_CONSECUTIVE_MSG_READS
 from utils.messaging_helper import parse_byte_message
-from utils.bkp.controllers.all_controllers import AllControllers, DynamicIpControllerKeys
 
 
 class Maestro:
@@ -53,20 +52,6 @@ class Maestro:
         self.control_values = dict()  # {Control signal key: ControlChannel object}
         # this will be updated every time a new mapping is assigned in the "set_control_mapping" method
 
-        # --- CHECKS
-        # all controllers with dynamic ip flag must have an id that is present in the DynamicIpControllerKeys enum.
-        # if this is not the case, print and exit the program
-        for controller in AllControllers:
-            if not controller.value.static_ip:
-                all_good = False
-                for dynamic_ip_controller_key in DynamicIpControllerKeys:
-                    if controller.value.id == dynamic_ip_controller_key.value:
-                        all_good = True
-                        break
-                if not all_good:
-                    print(f"[ERROR][Maestro] Controller {controller.value.unique_id} has dynamic IP but its id is not in "
-                          f"DynamicIpControllerKeys enum. Please add it there.")
-                    exit(1)
 # - - - - -  - - - - -  - - - - -  - - - - -  - - - - -  - - - - -  - - - - -  - - - - - SERIAL
 
     def write_serial(self):
@@ -88,13 +73,13 @@ class Maestro:
         for arduino_channel in self.sensing_dict.keys():
             # read one byte at a time, one for each sensor
             for in_sensor_serial in self.sensing_dict[arduino_channel]:
-                print(f"      --- READ {self.index} --- for sensor: {in_sensor_serial.key}")
+                # print(f"      --- READ {self.index} --- for sensor: {in_sensor_serial.key}")
                 while True:
                     line = arduino_channel.read_serial_byte_non_blocking()
                     if line is not None:
                         # convert byte to integer between 0 and 255 and update the sensor value class
                         line = int.from_bytes(line, byteorder='big')
-                        print(f"      --- READ {self.index} --- mgs: {line} -- for sensor: {in_sensor_serial.key}")
+                        # print(f"      --- READ {self.index} --- mgs: {line} -- for sensor: {in_sensor_serial.key}")
                         in_sensor_serial.on_new_value(line)
                         break
 
@@ -188,7 +173,7 @@ class Maestro:
 
         # self.setup_controllers()
 
-        self.setup_complete =  True
+        self.setup_complete = True
 
     def loop(self):
         # if keyboard.is_pressed('q'):

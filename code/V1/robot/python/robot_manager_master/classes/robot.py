@@ -23,11 +23,11 @@ class Robot:
         # make a unique list of all the arduino ports from both control and sensing dicts
         self.all_arduino_ports = list(set(self.control_arduino_ports + self.sensor_arduino_ports))
 
-        # compose a [dof_key:dof] dict for easy fast access
-        self.dofs = dict()
+        # # compose a [dof] list for easy fast access
+        self.dofs = list()
         for arduino_port in self.control_arduino_ports:
             for dof in self.control_dict[arduino_port]:
-                self.dofs[dof.key] = dof
+                self.dofs.append(dof)
 
         # compose a [sensor_key:sensor] dict for easy fast access
         self.sensors = dict()
@@ -37,8 +37,8 @@ class Robot:
 
         self.control_key_channels = dict()
         for control_channel in self.control_channels:
-            for control_key in control_channel.keys:
-                self.control_channels[control_key] = control_channel
+            for control_key in control_channel.control_value_dict.keys():
+                self.control_key_channels[control_key] = control_channel
 
         self.num_dofs = len(self.dofs)
         self.num_sensors = len(self.sensors)
