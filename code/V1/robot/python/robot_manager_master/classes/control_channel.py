@@ -1,5 +1,6 @@
 
 from classes.control_value import ControlValue
+from configs.keys.control_value_keys import *
 
 
 # when UDP messages come:
@@ -65,14 +66,44 @@ class SingleControlChannel(ControlChannel):
                   f"new val: {self.dof.value} - dirty: {self.dof.dirty}")
 
 
-class PassThroughControlChannel(ControlChannel):
-    def __init__(self):
-        super(PassThroughControlChannel, self).__init__()
-    #
-    # def map_control_to_dof(self, control_value):
-    #     return control_value
+class TriskarControlChannel(ControlChannel):
+    def __init__(self, left_motor_dof, right_motor_dof, back_motor_dof, wheel_radius, robot_radius):
+        super(TriskarControlChannel, self).__init__()
+        self.control_value_dict[forward_dof_key] = ControlValue(forward_dof_key)
+        self.control_value_dict[strafe_dof_key] = ControlValue(strafe_dof_key)
+        self.control_value_dict[rotation_dof_key] = ControlValue(rotation_dof_key)
 
+        self.left_motor_dof = left_motor_dof
+        self.right_motor_dof = right_motor_dof
+        self.back_motor_dof = back_motor_dof
 
-# 1. pass through: the most basic mapping is a 1-1 mapping between one control value and one DOF value.
-# def pass_through(value):
-#     return value
+        self._wheelRadius = wheel_radius  # 3.5f //cm
+        self._robotRadius = robot_radius  # 12.5f  //cm
+        self._m1_R = -1.0 / wheel_radius
+        self._mL_R = -robot_radius / wheel_radius
+        self._C60_R = 0.500000000 / wheel_radius   # cos(60°) / R
+        self._C30_R = 0.866025404 / wheel_radius   # cos(30°) / R
+
+    def update_dofs(self):
+
+        dirty = False
+
+        for control_value in self.control_value_dict.values():
+            if control_value.dirty:
+                dirty = True
+                break
+
+        if dirty:
+            self.compute_motors()
+
+    def compute_motors(self):
+        # all the hard-coded values are test values with no particular meaning... but they work <3
+
+        dx12 = self._C60_R * self.control_value_dict[strafe_dof_key].get_current_value() * 10
+        dy12 = self._C30_R * self.control_value_dict[forward_dof_key].get_current_value() * 15
+        dthz123 = self._mL_R * self.control_value_dict[rotation_dof_key].get_current_value() * 2
+
+        self.right_motor_dof.value = dx12 + dy12 + dthz123
+        self.left_motor_dof.value = dx12 - dy12 + dthz123
+        self.back_motor_dof.value = (self._m1_R * self.control_value_dict[strafe_dof_key].get_current_value() * 10) \
+                                    + dthz123

@@ -28,3 +28,14 @@ MSG_DELIMITER = '_'
 min_control_value = 0
 max_control_value = 255
 
+
+# --------------------------------------------------------- ROBOT SIZES
+
+# --- Triskar Base
+# MID
+ROBOT_RADIUS_MID = 12.5
+WHEEL_RADIUS_MID = 3.5
+# BIG
+ROBOT_RADIUS_BIG = 13.5
+WHEEL_RADIUS_BIG = 5.0
+

@@ -10,12 +10,14 @@
 
 
 class Robot:
-    def __init__(self, ip, control_dict, sensing_dict, control_channels):
+    def __init__(self, ip, control_dict, sensing_dict, control_channels, python_sensors):
         self.control_dict = control_dict
 
         self.control_channels = control_channels
 
         self.sensing_dict = sensing_dict
+
+        self.python_sensors = python_sensors
 
         self.control_arduino_ports = list(self.control_dict.keys())
         self.sensor_arduino_ports = list(self.sensing_dict.keys())

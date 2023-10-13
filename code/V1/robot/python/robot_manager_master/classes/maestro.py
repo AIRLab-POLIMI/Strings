@@ -112,6 +112,15 @@ class Maestro:
         # assign to the control channel dict the control signal key
         self.control_values[control_signal_key] = control_channel.control_value_dict[control_value_key]
 
+    # - - - - -  - - - - -  - - - - -  - - - - -  - - - - -  - - - - -  - - - - -  - - - - - PYTHON SENSORS
+
+    # this portion contains computations for all the data that is collected by the sensors connected to Python direclty.
+    # e.g. the Camera.
+
+    def setup_python_sensors(self):
+        for python_sensor in self.robot.python_sensors:
+            python_sensor.setup()
+
     # - - - - -  - - - - -  - - - - -  - - - - -  - - - - -  - - - - -  - - - - -  - - - - - NETWORK
 
     # network communication does two things:
@@ -161,7 +170,10 @@ class Maestro:
 
     def write_udp(self):
         # self.network_channel.write_udp(....)
-        pass
+        for python_sensor in self.robot.python_sensors:
+            msg = python_sensor.get_udp_message()
+            if msg is not None:
+                self.network_channel.write_udp(msg, "192.168.0.101", 12345)
 
     # - - - - -  - - - - -  - - - - -  - - - - -  - - - - -  - - - - -  - - - - -  - - - - - MAIN
 
@@ -171,7 +183,7 @@ class Maestro:
 
         self.network_channel.setup_udp()
 
-        # self.setup_controllers()
+        self.setup_python_sensors()
 
         self.setup_complete = True
 
@@ -179,11 +191,17 @@ class Maestro:
         # if keyboard.is_pressed('q'):
         #     self.close_program()
 
+        # 0. Python sensor update
+        # TODO if it's a bit slow, do the PSLoop only inside the Network loop when you're about to send;
+        # TODO and/or send with higher frequency
+        self.python_sensor_loop()
+
         # A. NETWORK COMMUNICATION
         self.network_communication()
 
         # B. SERIAL COMMUNICATION
         self.serial_communication()
+
 
     # - - - - -  - - - - -  - - - - -  - - - - -  - - - - -  - - - - -  - - - - -  - - - - - UTILS
 

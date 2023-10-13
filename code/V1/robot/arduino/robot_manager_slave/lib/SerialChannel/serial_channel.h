@@ -1,5 +1,7 @@
+
 #ifndef serialchannel_h
 #define serialchannel_h
+
 
 #include <Arduino.h>
 
@@ -9,7 +11,6 @@ class SerialChannel {
 
     // current data
     String current_line;
-    char current_char[];
     
     // setup
     void Setup(unsigned long baudRate) {
