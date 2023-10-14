@@ -25,3 +25,14 @@ Within each experiment folder you can find documents on the setup and results su
 - questionnaires 
 - answers
 - plots/tables of elaborations of the results
+
+
+# UTILS
+
+-- RASP HOSTNAME/PSWD
+
+:: Physical Metaverse 2.4Gz ::
+
+
+ - FLOWER ::: hostname: pi@192.168.0.2 - psw: 1234 OR aerolabio
+ 
