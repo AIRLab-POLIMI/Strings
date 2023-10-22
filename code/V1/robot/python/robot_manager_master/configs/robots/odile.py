@@ -1,7 +1,8 @@
 
 from classes.robot import Robot
-from classes.dof import Dof
-from classes.control_channel import SingleControlChannel, TriskarControlChannel
+from classes.dof import Dof, ScaledDof
+from classes.control_channels.control_channel import SingleControlChannel
+from classes.control_channels.triskar_control_channel import TriskarControlChannel
 from configs.keys.control_value_keys import *
 from utils.constants import ROBOT_RADIUS_BIG, WHEEL_RADIUS_BIG
 from classes.python_sensor import CameraPythonSensor
@@ -10,7 +11,8 @@ from classes.python_sensor import CameraPythonSensor
 # config file for robot ODILE
 
 # 0. IP
-odile_ip = "192.168.0.101"
+# odile_ip = "192.168.0.101"
+odile_ip = "192.168.0.2"
 
 # A. DOFS
 # forward_dof = Dof()
@@ -50,10 +52,10 @@ control_channels = [triskar_cc,
 # B. CONTROL DICT
 control_dict = {
     # "/dev/cu.usbmodem14101": [forward_dof, strafe_dof, rotation_dof],
-    "/dev/cu.usbmodem14101": [wheel_left_dof, wheel_right_dof, wheel_back_dof],
+    "/dev/usb_device12": [wheel_right_dof, wheel_left_dof, wheel_back_dof],
 
-    "/dev/cu.usbmodem14102": [head_x_dof, head_y_dof,
-                              neck_forward_dof, arm_horizontal_dof, arm_shoulder_dof, arm_elbow_dof]
+    # "/dev/cu.usbmodem14102": [head_x_dof, head_y_dof,
+    #                           neck_forward_dof, arm_horizontal_dof, arm_shoulder_dof, arm_elbow_dof]
 }
 
 # C. SENSORS

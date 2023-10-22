@@ -12,6 +12,13 @@
 
 #define FREQUENCY 16000
 
+
+// the idea is that the DOFS will be updated one at a time. Each time a DOF of the TRISKAR base is updated, 
+// a counter is increased. When it reaches 3, it means all DOFS of the base have been set. 
+// if even one has changed wrt the previous, triskar motor setpoints are recomputed. 
+// the counter is reset. 
+
+
 class TriskarBase
 {
     protected:
@@ -242,10 +249,6 @@ class TriskarBaseBig: public TriskarBase {
         }
 
 };
-
-
-
-
 
 
 #endif

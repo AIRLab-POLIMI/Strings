@@ -12,6 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b98110fa4b66a430db8817cfb379337e, type: 3}
   m_Name: RaspberryEndPoint
   m_EditorClassIdentifier: 
-  stringIP: 192.168.0.102
+  stringIP: 192.168.0.2
   port: 25666
   uiName: Raspberry

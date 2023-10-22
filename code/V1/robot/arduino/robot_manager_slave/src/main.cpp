@@ -1,14 +1,16 @@
 #include <Arduino.h>
 #include <OdileArms.h>
+#include <TraskarModule.h>
 
 
-OdileArms odile;
+OdileArms robotModule;
+// TriskarModule robotModule;
 
 
 void setup() {
-  odile.setup();
+  robotModule.setup();
 }
 
 void loop() {
-  odile.loop();
+  robotModule.loop();
 }

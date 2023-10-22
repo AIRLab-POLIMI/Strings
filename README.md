@@ -34,5 +34,12 @@ Within each experiment folder you can find documents on the setup and results su
 :: Physical Metaverse 2.4Gz ::
 
 
- - FLOWER ::: hostname: pi@192.168.0.2 - psw: 1234 OR aerolabio
+ - FLOWER ::: hostname: pi@192.168.0.2 - psw: aerolabio
+
+ to access the dev rules that assigned the custom names to the serial ports, tyep in the terminal 
+ sudo nano /etc/udev/rules.d/99-usb-serial.rules
+
+ the ports are assigned from the top-left to the bottom-right going horizonally (looking at the ports from the front). 
+ The logic is that the device number are the indices of the port in the matrix of their position
+ * usb_device11
  

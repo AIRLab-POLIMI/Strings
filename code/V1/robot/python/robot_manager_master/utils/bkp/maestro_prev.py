@@ -66,7 +66,7 @@ class Maestro:
     # - - - - -  - - - - -  - - - - -  - - - - -  - - - - -  - - - - -  - - - - -  - - - - - SERIAL
 
     def write_serial(self):
-        # for each arduino channel of the control channels, write as many bytes as there are DOFs in the list
+        # for each arduino channel of the control_channels, write as many bytes as there are DOFs in the list
         for arduino_channel in self.control_dict.keys():
             # write a single message with all the bytes, one for each DOF of this channel
             # pass

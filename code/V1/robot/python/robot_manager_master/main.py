@@ -1,4 +1,6 @@
 
+import time
+
 from classes.maestro import Maestro
 
 from configs.robots.odile import odile
@@ -39,7 +41,12 @@ def main():
     maestro.setup()
 
     while True:
+
+        # a = time.time()
+
         maestro.loop()
+
+        # print(f"loop time: '{time.time() - a}")
 
 
 if __name__ == "__main__":

@@ -11,10 +11,27 @@
 
 
 class Dof {
+  protected:
+
+    bool _isSpeed;
+  
   public:
+    
+    virtual ~Dof() {}  // Declare a virtual destructor for the base class
+
+    Dof(bool isSpeed){
+      _isSpeed = isSpeed;
+    }
+
+    bool IsSpeed() {
+      return _isSpeed;
+    }
+
     virtual bool OnNewValueReceived(uint8_t value) = 0;
 
     virtual void Setup() = 0;
+
+    virtual void SetToZero() = 0;
 };
 
 
@@ -29,7 +46,7 @@ class BasicDof: public Dof {
     int _currentValue;
 
   public: 
-    BasicDof(int min, int max) {
+    BasicDof(int min, int max, bool isSpeed): Dof(isSpeed) {
       _min = min;
       _max = max;
       _normRange = (max - min)/255.0;
@@ -44,6 +61,10 @@ class BasicDof: public Dof {
       }
       return false;
     }
+
+    void SetToZero() {
+      // nothing happends, stay where it was, it's a POSITION dof
+    }
 };
 
 // define basicservodof that extends basicdof
@@ -56,7 +77,7 @@ class BasicServoDof : public BasicDof {
 
   public:
     // implement constructor
-    BasicServoDof(int pin, int min, int max) : BasicDof(min, max) {
+    BasicServoDof(int pin, int min, int max) : BasicDof(min, max, false) {
       _pin = pin;
     }
 
@@ -78,7 +99,7 @@ class BasicServoDof : public BasicDof {
 
 
 
-class BasicDcDof {
+class BasicDcDof: public Dof {
   protected:
 
     int _pinA;
@@ -89,7 +110,7 @@ class BasicDcDof {
 
   public: 
 
-    BasicDcDof(int pinA, int pinB) {
+    BasicDcDof(int pinA, int pinB): Dof(true) {
       _pinA = pinA;
       _pinB = pinB;
     }
@@ -113,6 +134,10 @@ class BasicDcDof {
       return false;
     }
 
+    void SetToZero() {
+      OnNewValueReceived(127);
+    }
+
     virtual void SetMotorSpeed(int speed) = 0;
 };
 
@@ -120,6 +145,8 @@ class BasicDcDof {
 class BasicDcDofMid : public BasicDcDof {
 
   public:
+
+    BasicDcDofMid(int pinA, int pinB) : BasicDcDof(pinA, pinB){}
 
     void SetMotorSpeed(int speed) {
       // Make sure the speed is within the limit.
@@ -146,6 +173,8 @@ class BasicDcDofMid : public BasicDcDof {
 class BasicDcDofBig : public BasicDcDof {
 
   public:
+
+    BasicDcDofBig(int pinA, int pinB) : BasicDcDof(pinA, pinB){}
 
     // add code to the Setup method of the Base class BasicDcDof
     void Setup() {
@@ -183,8 +212,6 @@ class BasicDcDofBig : public BasicDcDof {
       }
     }
 };
-
-
 
 
 #endif

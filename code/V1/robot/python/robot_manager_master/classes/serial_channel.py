@@ -36,6 +36,17 @@ class SerialChannel:
                 self.ser.reset_input_buffer()
                 self.ser.reset_output_buffer()
                 time.sleep(self.delay_after_setup)
+
+                # self.ser.close()  # RESET IT, them start again
+                #
+                # time.sleep(self.delay_after_setup)
+                #
+                # self.ser = serial.Serial(self.port, self.baud, timeout=self.timeout)
+                # time.sleep(self.delay_after_setup)
+                # self.ser.reset_input_buffer()
+                # self.ser.reset_output_buffer()
+                # time.sleep(self.delay_after_setup)
+
                 print(f"[SERIALCHANNEL][PORT '{self.port}'][SETUP SERIAL] - connected SUCCESSFULLY")
                 break
             except Exception as e:

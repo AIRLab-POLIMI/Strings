@@ -4,7 +4,7 @@ import time
 from classes.serial_channel import SerialChannel
 from classes.network_channel import NetworkChannel
 from utils.constants import DEFAULT_SERIAL_ELAPSED, DEFAULT_NETWORK_SEND_ELAPSED_SEC, DEFAULT_MAX_CONSECUTIVE_MSG_READS
-from utils.messaging_helper import parse_byte_message
+from utils.messaging_helper import parse_byte_message, bytes_to_unicode_str
 
 
 class Maestro:
@@ -56,10 +56,10 @@ class Maestro:
 
     def write_serial(self):
         # A - for each control channel, call the UPDATE DOF method to get the current dof values
-        for control_channel in self.robot.control_channels.values():
-            control_channel.update_dof_values()
+        for control_channel in self.robot.control_channels:
+            control_channel.update_dofs()
 
-        # B - for each arduino channel of the control channels, write as many bytes as there are DOFs in the list
+        # B - for each arduino channel of the control_channels, write as many bytes as there are DOFs in the list
         for arduino_channel in self.control_dict.keys():
             # write a single message with all the bytes, one for each DOF of this channel
             # pass
@@ -90,7 +90,7 @@ class Maestro:
     def serial_communication(self):
         # can perform a SERIAL ACTION only every 'self.last_serial_time' seconds (~10ms usually)
         if time.time() - self.last_serial_time < self.serial_elapsed:
-            # print(".. NO SERIAL COMM ..")
+            # print(f".. NO SERIAL COMM ..")
             return
 
         else:
@@ -101,6 +101,7 @@ class Maestro:
             else:
                 self.read_serial()
                 self.write = True
+                # print("read from serial")
             self.last_serial_time = time.time()
 
     # - - - - -  - - - - -  - - - - -  - - - - -  - - - - -  - - - - -  - - - - -  - - - - - CONTROLLERS
@@ -138,21 +139,24 @@ class Maestro:
         while self.network_channel.read_udp_non_blocking():
 
             # 1. try to get key-value messages
-            key_value_msgs = parse_byte_message(self.network_channel.udp_data[0])
+            key_value_msgs = parse_byte_message(bytes_to_unicode_str(self.network_channel.udp_data[0]))
+            # print(f"[MAESCRO][network communication] - received message: '{key_value_msgs}'")
+
             # 2. if there is at least a key-value message, update the corresponding controller
             if key_value_msgs is not None:
-                for key, value in key_value_msgs.items():
+                for key_value_msg in key_value_msgs:
                     # print(f"[maestro][network_communication] - "
                     #       f"received key: '{key}' with value: '{value}' "
                     #       f"from controller with ip: {self.network_channel.udp_data[1][0]}")
-                    if key in self.control_values.keys():
-                        self.control_values[key].on_msg_received(value)
+                    if key_value_msg.key in self.control_values.keys():
+                        self.control_values[key_value_msg.key].on_msg_received(float(key_value_msg.value))
                     else:
-                        print(f"[maestro][network_communication] - "
-                              f"received key: '{key}' with value: '{value}' "
-                              f"from controller with ip: '{self.network_channel.udp_data[1][0]}' "
-                              f"but this key is not in the control_keys_dict. "
-                              f"Please add it to the control_keys_dict in the constructor of Maestro.")
+                        pass
+                        # print(f"[maestro][network_communication] - "
+                        #       f"received key: '{key_value_msg.key}' with value: '{key_value_msg.value}' "
+                        #       f"from controller with ip: '{self.network_channel.udp_data[1][0]}' "
+                        #       f"but this key is not in the control_keys_dict. "
+                        #       f"Please add it to the control_keys_dict in the constructor of Maestro.")
                 num_read += 1
                 if num_read > DEFAULT_MAX_CONSECUTIVE_MSG_READS:
                     break
@@ -194,14 +198,13 @@ class Maestro:
         # 0. Python sensor update
         # TODO if it's a bit slow, do the PSLoop only inside the Network loop when you're about to send;
         # TODO and/or send with higher frequency
-        self.python_sensor_loop()
+        # self.python_sensor_loop()
 
         # A. NETWORK COMMUNICATION
         self.network_communication()
 
         # B. SERIAL COMMUNICATION
         self.serial_communication()
-
 
     # - - - - -  - - - - -  - - - - -  - - - - -  - - - - -  - - - - -  - - - - -  - - - - - UTILS
 
