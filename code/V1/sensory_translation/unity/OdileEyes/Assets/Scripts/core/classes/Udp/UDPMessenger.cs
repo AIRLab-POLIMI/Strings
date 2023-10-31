@@ -109,6 +109,10 @@ public class UDPMessenger
                 try
                 {
                     OnMessageReceived();
+                    OnMessageReceived();
+                    // OnMessageReceived();
+                    // OnMessageReceived();
+                    // OnMessageReceived();
                 }
                 catch (SocketException e)
                 {
@@ -125,7 +129,12 @@ public class UDPMessenger
         {
             IPEndPoint anyIP = new IPEndPoint(IPAddress.Any, this.MyPort);
             byte[] data = _client.Receive(ref anyIP);
-            string text = Encoding.UTF8.GetString(data);
+            // string text = Encoding.UTF8.GetString(data);
+
+            Debug.Log($"uffa: {data.Length} - from ip: {anyIP.Address}");
+            
+            // TODO I avoid encoding the camera data which significantly slows down parsing
+            string text = "";
 
             // add message to unread list and save it as Latest
             LatestUdpMsg = new UdpMessage(data, text, anyIP);
@@ -134,6 +143,8 @@ public class UDPMessenger
             // if maximum amount has been reached, remove oldest unread message
             if (_unreadUdpMsgs.Count > _bufferSize)
                 _unreadUdpMsgs.RemoveAt(0);
+            
+            
         }
         
     #endregion

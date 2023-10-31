@@ -17,6 +17,10 @@ public class InputManager : Monosingleton<InputManager>
     [SerializeField] private string headXAngleKey = "ay";
     [SerializeField] private string headYAngleKey = "az";
     [Range(0, 1)][SerializeField] private float headAnglesTolerance = 0.2f;
+
+    [SerializeField] private bool sendHead;
+    [SerializeField] private bool sendHands;
+    
     private Vector3 _headAngles;
     private float _prevXAngle;
     private float _prevYAngle;
@@ -36,6 +40,7 @@ public class InputManager : Monosingleton<InputManager>
                     : GetUdpMessage();
                 
                 UDPManager.Instance.SendStringUpdToDefaultEndpoint(msgToSend);
+                Debug.Log($"[InputManager] - msg to send: {msgToSend}");
                 _prevSendTime = Time.time;
             }
         }
@@ -47,11 +52,16 @@ public class InputManager : Monosingleton<InputManager>
 
         public string GetUdpMessage()
         {
-            var msg = GetHeadAnglesMsg();
+            var msg = sendHead
+                ? GetHeadAnglesMsg()
+                : "";
 
-            // AddMsg for every controller in the list
-            foreach (var controller in controllers)
-                msg = AddMsg(msg, controller.GetUdpMessage(_headAngles.y));
+            if (sendHands)
+            {
+                // AddMsg for every controller in the list
+                foreach (var controller in controllers)
+                    msg = AddMsg(msg, controller.GetUdpMessage(_headAngles.y));
+            }   
             
             // if msg is not empty, SendMsg
             return msg;

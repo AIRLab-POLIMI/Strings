@@ -17,7 +17,7 @@ public class UDPManager : Monosingleton<UDPManager>
     [SerializeField] private int maxUdpAge = 2;
 
     [Tooltip("max amount of unread UDP messages")]
-    [SerializeField] private int bufferSize = 50;
+    [SerializeField] private int bufferSize = 1;
     
     [SerializeField] private KeyValueGameEventSO onKeyValueReceived;
     
@@ -83,9 +83,22 @@ public class UDPManager : Monosingleton<UDPManager>
         if (!_initialized)
             return;
         
-        ReceiveMessages();
+        // ReceiveMessages();
     }
 
+    public byte[] TryGetFrame()
+    {
+        if (_udpMessenger.UnreadMsgsPresent)
+        {
+            var messages = _udpMessenger.UnreadUdpMessages;
+
+            // return the last message
+            return messages[messages.Count - 1].RawMsg;
+        }
+        
+        return null;
+    }
+    
     private void ReceiveMessages()
     {
         if (_udpMessenger.UnreadMsgsPresent)
@@ -96,15 +109,18 @@ public class UDPManager : Monosingleton<UDPManager>
             {
                 // check if it's a key-value message
                 // otherwise, store the raw data in the input buffer, to be used by the UdpCameraViewer
-                if (!CheckKeyValueMessage(message.Msg))
-                {
-                    // Debug.Log($"[UDP MANAGER] - RECEIVED RAW MESSAGE: {message.RawMsg} - {message.RawMsg.Length}");
-                    _data = message.RawMsg;
-                }
-                else
-                {
-                    Debug.Log($"[UDP MANAGER] - RECEIVED KEY VALUE MESSAGE");
-                }
+                // if (!CheckKeyValueMessage(message.Msg))
+                // {
+                //     // Debug.Log($"[UDP MANAGER] - RECEIVED RAW MESSAGE: {message.RawMsg} - {message.RawMsg.Length}");
+                //     _data = message.RawMsg;
+                // }
+                // else
+                // {
+                //     Debug.Log($"[UDP MANAGER] - RECEIVED KEY VALUE MESSAGE");
+                // }
+                
+                // TODO I DIRECTLY ASSIGN THE RAW DATA TO "DATA"
+                _data = message.RawMsg;
             }
         }
     }
